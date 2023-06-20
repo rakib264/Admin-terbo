@@ -1,13 +1,13 @@
-export default function TopBar({ showNav, setShowNav }) {
+export default function TopBar({ sidebarOpen, setSidebarOpen }) {
     return (
         <header
-            className={`bg-gray-300 fixed w-full h-16 flex justify-between items-center transition-all duration-[400ms] ${showNav ? "pl-48" : ""
+            className={`bg-gray-300 fixed w-full h-16 flex justify-between items-center transition-all duration-[500ms] ${sidebarOpen ? "pl-48" : ""
                 }`}
         >
             <div className="navbar bg-secondary px-4">
                 <div className="flex-1">
                     <button
-                        onClick={() => setShowNav(!showNav)}
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />

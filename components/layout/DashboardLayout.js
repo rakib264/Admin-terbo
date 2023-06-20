@@ -6,15 +6,15 @@ import Footer from "../global/Footer";
 import SideBar from "../global/Sidebar";
 import TopBar from "../global/Topbar";
 export default function Layout({ children }) {
-    const [showNav, setShowNav] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
 
     function handleResize() {
         if (window.innerWidth <= 640) {
-            setShowNav(false);
+            setSidebarOpen(false);
             setIsMobile(true);
         } else {
-            setShowNav(true);
+            setSidebarOpen(true);
             setIsMobile(false);
         }
     }
@@ -29,20 +29,20 @@ export default function Layout({ children }) {
 
     return (
         <div className="flex min-h-screen">
-            <TopBar showNav={showNav} setShowNav={setShowNav} />
+            <TopBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <Transition
                 as={Fragment}
-                show={showNav}
-                enter="transform transition duration-[400ms]"
+                show={sidebarOpen}
+                enter="transform transition duration-[500ms]"
                 enterFrom="-translate-x-full"
                 enterTo="translate-x-0"
-                leave="transform duration-[400ms] transition ease-in-out"
+                leave="transform duration-[500ms] transition ease-in-out"
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
             >
-                <SideBar showNav={showNav} />
+                <SideBar sidebarOpen={sidebarOpen} />
             </Transition>
-            <div className={`pt-16 transition-all duration-[400ms] ${showNav && !isMobile ? "pl-48" : ""} flex-grow`}>
+            <div className={`pt-16 transition-all duration-[500ms] ease-in-out ${sidebarOpen && !isMobile ? "pl-48" : ""} flex-grow`}>
                 <main className="p-2 bg-primary h-full">
                     {children}
                 </main>
