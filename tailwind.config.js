@@ -4,7 +4,24 @@ module.exports = {
       './pages/**/*.{js,ts,jsx,tsx,mdx}',
       './components/**/*.{js,ts,jsx,tsx,mdx}',
       './app/**/*.{js,ts,jsx,tsx,mdx}'
+      // './node_modules/tw-elements/dist/js/**/*.js'
    ],
+
+   theme: {
+      extend: {
+         /* ...other tailwind configurations */
+         styles: {
+            /* ...other tailwind styles */
+            '.custom-date-input': {
+               /* Customize the desired styles */
+               backgroundColor: 'black',
+               borderColor: 'red',
+               color: '#4a5568'
+               /* Add other styles as needed */
+            }
+         }
+      }
+   },
    daisyui: {
       themes: [
          {
@@ -32,3 +49,24 @@ module.exports = {
    },
    plugins: [require('daisyui'), require('tw-elements/dist/plugin.cjs')]
 };
+
+// // /* CSS file */
+// // .hide-input-placeholder::-webkit-input-placeholder {
+// //    color: transparent;
+// //  }
+
+//  /* tailwind.config.js */
+//  module.exports = {
+//    // theme: {
+//    //   extend: {
+//    //     /* ...other tailwind configurations */
+//    //     styles: {
+//    //       /* ...other tailwind styles */
+//    //       '.hide-input-placeholder::-webkit-input-placeholder': {
+//    //         color: 'transparent',
+//    //       },
+//    //     },
+//    //   },
+//    // },
+//    /* ...other tailwind configurations */
+//  };
