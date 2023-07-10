@@ -38,7 +38,7 @@ const DatePicker = () => {
          {/* Render the array of dates */}
          <ul className='flex items-center gap-6'>
             {datesArray.map(date => (
-               <li key={date}>{date.toLocaleDateString()}</li>
+               <li key={date}>{format(date, 'yyyy-MM-dd')}</li>
             ))}
          </ul>
       </div>

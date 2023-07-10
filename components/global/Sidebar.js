@@ -2,13 +2,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { forwardRef, useMemo } from 'react';
 
-import { BiBarcodeReader, BiNews } from 'react-icons/bi';
-import { FaCcStripe, FaDollarSign, FaIoxhost, FaUsers } from 'react-icons/fa';
-import { ImFileVideo, ImUserCheck } from 'react-icons/im';
+import { BiNews } from 'react-icons/bi';
+import { ImFileVideo } from 'react-icons/im';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { IoDesktopOutline, IoGrid, IoPlayCircle } from 'react-icons/io5';
 import { LuFileVideo } from 'react-icons/lu';
-import { MdAdminPanelSettings, MdCached } from 'react-icons/md';
+import { MdAdminPanelSettings } from 'react-icons/md';
 
 const SideBar = forwardRef(({ sidebarOpen }, ref) => {
    const pathname = usePathname();
@@ -50,57 +49,57 @@ const SideBar = forwardRef(({ sidebarOpen }, ref) => {
             active: pathname === '/notifications',
             href: '/notifications'
          },
-         {
-            icon: FaUsers,
-            label: 'Manage Users',
-            active: pathname === '/users',
-            href: '/users'
-         },
-         {
-            icon: ImUserCheck,
-            label: 'Manage Admin',
-            active: pathname === '/admin',
-            href: '/admin'
-         },
-         {
-            icon: FaIoxhost,
-            label: 'Subsscriptions',
-            active: pathname === '/subscription',
-            href: '/subscription'
-         },
-         {
-            icon: BiBarcodeReader,
-            label: 'Coupon Code',
-            active: pathname === '/coupons',
-            href: '/coupons'
-         },
-         ,
-         {
-            icon: FaDollarSign,
-            label: 'Payments',
-            active: pathname === '/payments',
-            href: '/payments'
-         },
-         ,
-         {
-            icon: FaCcStripe,
-            label: 'Stripe',
-            active: pathname === '/stripe',
-            href: '/stripe'
-         },
-         ,
+         // {
+         //    icon: FaUsers,
+         //    label: 'Manage Users',
+         //    active: pathname === '/users',
+         //    href: '/users'
+         // },
+         // {
+         //    icon: ImUserCheck,
+         //    label: 'Manage Admin',
+         //    active: pathname === '/admin',
+         //    href: '/admin'
+         // },
+         // {
+         //    icon: FaIoxhost,
+         //    label: 'Subsscriptions',
+         //    active: pathname === '/subscription',
+         //    href: '/subscription'
+         // },
+         // {
+         //    icon: BiBarcodeReader,
+         //    label: 'Coupon Code',
+         //    active: pathname === '/coupons',
+         //    href: '/coupons'
+         // },
+         // ,
+         // {
+         //    icon: FaDollarSign,
+         //    label: 'Payments',
+         //    active: pathname === '/payments',
+         //    href: '/payments'
+         // },
+         // ,
+         // {
+         //    icon: FaCcStripe,
+         //    label: 'Stripe',
+         //    active: pathname === '/stripe',
+         //    href: '/stripe'
+         // },
+         // ,
+         // {
+         //    icon: MdCached,
+         //    label: 'Cache Clean',
+         //    active: pathname === '/cache',
+         //    href: '/cache'
+         // },
+
          {
             icon: BiNews,
             label: 'News',
             active: pathname === '/news',
             href: '/news'
-         },
-         ,
-         {
-            icon: MdCached,
-            label: 'Cache Clean',
-            active: pathname === '/cache',
-            href: '/cache'
          },
          ,
          {
@@ -125,19 +124,21 @@ const SideBar = forwardRef(({ sidebarOpen }, ref) => {
             {routes.map((route, index) => {
                const { label, icon: Icon, active, href } = route;
                return (
-                  <Link href={href}>
-                     <div
+                  <div>
+                     <Link
                         className={`flex flex-row items-center 
                                 gap-3 px-4 py-3 text-white hover:bg-gray-500 hover:rounded
                                 ${active && 'bg-gray-400 rounded-md my-1'}
                                 `}
+                        key={index}
+                        href={href}
                      >
                         <Icon size={20} />
                         <div className='text-sm font-semibold truncate'>
                            {label}
                         </div>
-                     </div>
-                  </Link>
+                     </Link>
+                  </div>
                );
             })}
             {/* <Link href="/">Manage Live</Link>

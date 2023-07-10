@@ -44,7 +44,7 @@ export const PlatformOptions = [
    },
    {
       id: 2,
-      name: 'IOS'
+      name: 'Ios'
    }
 ];
 export const ResolutionOptions = [
@@ -69,7 +69,7 @@ export const ResolutionOptions = [
 export const StreamTypeOptions = [
    {
       id: 0,
-      name: 'XoomStream'
+      name: 'OwnStream'
    },
    {
       id: 1,
@@ -81,6 +81,171 @@ export const StreamTypeOptions = [
    },
    {
       id: 3,
+      name: 'Web'
+   }
+];
+
+export const NotificationType = [
+   {
+      id: 0,
+      name: 'OneSignal'
+   },
+   {
+      id: 1,
+      name: 'FCM'
+   }
+];
+
+export const AdsType = [
+   {
+      id: 1,
+      name: 'Google'
+   }
+];
+
+export const clickControl = [
+   {
+      id: 0,
+      name: 'OFF'
+   },
+   {
+      id: 1,
+      name: 1
+   },
+   {
+      id: 2,
+      name: 2
+   },
+   {
+      id: 3,
+      name: 3
+   },
+   {
+      id: 4,
+      name: 4
+   },
+   {
+      id: 5,
+      name: 5
+   },
+   {
+      id: 6,
+      name: 6
+   },
+   {
+      id: 7,
+      name: 7
+   },
+   {
+      id: 8,
+      name: 8
+   },
+   {
+      id: 9,
+      name: 9
+   },
+   {
+      id: 10,
+      name: 10
+   }
+];
+
+export const ForceUpdate = [
+   {
+      id: 0,
+      name: 'Yes'
+   },
+   {
+      id: 1,
+      name: 'No'
+   }
+];
+
+export const VideoType = [
+   {
+      id: 0,
+      name: 'None'
+   },
+   {
+      id: 1,
+      name: 'Sportmonk'
+   },
+   {
+      id: 1,
+      name: 'Youtube'
+   }
+];
+
+export const ThumbnailImage = [
+   {
+      id: 0,
+      name: 'None'
+   },
+   {
+      id: 1,
+      name: 'Url'
+   },
+   {
+      id: 2,
+      name: 'Image'
+   }
+];
+
+export const PublishControl = [
+   {
+      id: 0,
+      name: 'On'
+   },
+   {
+      id: 1,
+      name: 'Off'
+   }
+];
+
+export const AppDefaultPage = [
+   {
+      id: 0,
+      name: 'Home'
+   },
+   {
+      id: 1,
+      name: 'Live'
+   }
+];
+
+export const HighlightsOptions = [
+   {
+      id: 0,
+      name: 'Enable'
+   },
+   {
+      id: 1,
+      name: 'Disable'
+   },
+   {
+      id: 2,
+      name: 'YouTube'
+   }
+];
+
+export const AdsStatus = [
+   {
+      id: 0,
+      name: 'On'
+   },
+   {
+      id: 1,
+      name: 'Off'
+   }
+];
+
+export const updateLocation = [
+   {
+      id: 0,
+      name: 'Store'
+   },
+   {
+      id: 0,
       name: 'Web'
    }
 ];
