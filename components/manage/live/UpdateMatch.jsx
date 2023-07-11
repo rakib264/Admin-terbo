@@ -15,6 +15,7 @@ import Select from '@/components/Input/Select';
 import TextArea from '@/components/Input/Textarea';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useGetSingleMatchQuery } from '@/features/api/apiSlice';
+import axios from 'axios';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -36,18 +37,23 @@ const StreamItemFields = ({
       control
    });
 
-   if (headers?.length > 0) {
-      let initialFieldValues = JSON.parse(headers);
-      let newFields = [];
+   useEffect(() => {
+      if (headers?.length > 0) {
+         let initialFieldValues = JSON.parse(headers);
+         let newFields = [];
 
-      // Push new field objects to newFields array
-      for (let i = 0; i < initialFieldValues.length; i++) {
-         newFields.push({ ...initialFieldValues[i] });
+         // Push new field objects to newFields array
+         for (let i = 0; i < initialFieldValues.length; i++) {
+            newFields.push({ ...initialFieldValues[i] });
+         }
+         setValue(`streaming_sources[${itemIndex}].headers`, newFields);
       }
+   }, [headers, setValue]);
 
-      // Update the fields array with the newFields array
-      fields.splice(0, fields.length, ...newFields);
-   }
+   // Update the fields array with the newFields array
+   // fields.splice(0, fields.length, ...newFields);
+
+   //setValue(`streaming_sources[${itemIndex}].headers`, newFields);
 
    //console.log('Headers: ', headers);
 
@@ -191,15 +197,15 @@ const UpdateMatch = ({ matchId }) => {
    // console.log('defaultData', defaultData);
    //    console.log(format(new Date(defaultData?.time), 'yyyy-MM-dd'));
 
-   let length = defaultData?.streaming_sources?.length;
-   console.log(length);
+   // let length = defaultData?.streaming_sources?.length;
+   // console.log(length);
 
-   useEffect(() => {
-      if (length > 0) {
-         console.log('Length: ', length);
-         setDataLength(length);
-      }
-   }, [length, setDataLength]);
+   // useEffect(() => {
+   //    if (length > 0) {
+   //       console.log('Length: ', length);
+   //       setDataLength(length);
+   //    }
+   // }, [length, setDataLength]);
 
    // if (length !== null) {
    //    setArrayLength(length);
@@ -209,15 +215,15 @@ const UpdateMatch = ({ matchId }) => {
    //    setDataArray(defaultData?.streaming_sources?.length);
    // }
 
-   const handleAddMore = () => {
-      //console.log('Clicked');
-      setDataLength(prevState => prevState + 1);
-   };
+   // const handleAddMore = () => {
+   //    //console.log('Clicked');
+   //    setDataLength(prevState => prevState + 1);
+   // };
 
-   const removeData = () => {
-      //console.log('Clicked');
-      setDataLength(prevState => prevState - 1);
-   };
+   // const removeData = () => {
+   //    //console.log('Clicked');
+   //    setDataLength(prevState => prevState - 1);
+   // };
 
    const {
       register,
@@ -266,6 +272,43 @@ const UpdateMatch = ({ matchId }) => {
       control
    });
 
+   useEffect(() => {
+      if (defaultData?.streaming_sources?.length > 0) {
+         let initialFieldValues = defaultData?.streaming_sources;
+         let newFields = [];
+
+         // Push new field objects to newFields array
+         for (let i = 0; i < initialFieldValues.length; i++) {
+            newFields.push({ ...initialFieldValues[i] });
+         }
+         setValue(`streaming_sources`, newFields);
+      }
+   }, [defaultData, setValue]);
+
+   useEffect(() => {
+      if (team_one_image === 'Image') {
+         setTeamoneUrl('');
+      }
+      if (team_one_image === 'Url') {
+         setFileOne('');
+         setImageOneSrc('');
+      }
+      if (team_two_image === 'Image') {
+         setTeamtwoUrl('');
+      }
+      if (team_two_image === 'Url') {
+         setFileTwo('');
+         setImageTwoSrc('');
+      }
+   }, [
+      team_one_image,
+      team_two_image,
+      setTeamoneUrl,
+      setTeamtwoUrl,
+      setFileOne,
+      setFileTwo
+   ]);
+
    // const [newFields, setNewField] = useState(defaultData?.streaming_sources);
 
    const handleFileChange = (event, imgSrc) => {
@@ -297,7 +340,7 @@ const UpdateMatch = ({ matchId }) => {
       <div className='w-full flex flex-col gap-2'>
          <div className='relative h-11 w-full min-w-[200px]'>
             <input
-               id='teamTwo'
+               id='teamOne'
                required
                value={teamoneUrl}
                onChange={e => setTeamoneUrl(e.target.value)}
@@ -306,7 +349,7 @@ const UpdateMatch = ({ matchId }) => {
                type='text'
             />
             <label
-               for='teamtwo'
+               for='teamOne'
                className="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-cyan-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-cyan-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-cyan-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
             >
                Image Url
@@ -546,8 +589,52 @@ const UpdateMatch = ({ matchId }) => {
       </div>
    );
 
-   const onSubmit = data => {
+   const onSubmit = async data => {
       console.log('Data :', data);
+
+      let oneImage;
+      let twoImage;
+
+      if (fileOne) {
+         const formData = new FormData();
+         formData.append('file', fileOne);
+         formData.append('upload_preset', 'o5xbjuuy');
+
+         try {
+            const response = await axios.post(
+               'https://api.cloudinary.com/v1_1/dlcti0s8p/image/upload',
+               formData
+            );
+            //console.log(response);
+            //setImageSrc(response?.data?.secure_url);
+            oneImage = response?.data?.secure_url;
+            console.log('OneImage', oneImage);
+         } catch (error) {
+            console.error(error);
+         }
+      }
+
+      if (fileTwo) {
+         const formData = new FormData();
+         formData.append('file', fileTwo);
+         formData.append('upload_preset', 'o5xbjuuy');
+
+         try {
+            const response = await axios.post(
+               'https://api.cloudinary.com/v1_1/dlcti0s8p/image/upload',
+               formData
+            );
+            //console.log(response);
+            //setImageSrc(response?.data?.secure_url);
+            twoImage = response?.data?.secure_url;
+            console.log('twoImage', twoImage);
+         } catch (error) {
+            console.error(error);
+         }
+      }
+
+      console.log('teamoneUrl', teamoneUrl);
+      console.log('teamtwoUrl', teamtwoUrl);
    };
 
    return (
@@ -724,7 +811,7 @@ const UpdateMatch = ({ matchId }) => {
                         return <div onClick={removeData}>{index}</div>;
                      })} */}
 
-                     {[...Array(dataLength)].map((_, index) => (
+                     {/* {[...Array(dataLength)].map((_, index) => (
                         <div
                            key={index}
                            className='my-4 grid grid-cols-1 lg:grid-cols-2 gap-6 ring-1 ring-gray-400 rounded-md px-8 py-6 relative'
@@ -919,6 +1006,203 @@ const UpdateMatch = ({ matchId }) => {
                               )}
                            </div>
                         </div>
+                     ))} */}
+
+                     {fields?.map((field, index) => (
+                        <div
+                           key={index}
+                           className='my-4 grid grid-cols-1 lg:grid-cols-2 gap-6 ring-1 ring-gray-400 rounded-md px-8 py-6 relative'
+                        >
+                           {index > 0 && (
+                              <button className='absolute right-8 top-4 flex items-center justify-center bg-teal-600 text-sm pp-2 w-10 h-10 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'>
+                                 <MdOutlineDeleteSweep
+                                    onClick={() => remove(index)}
+                                    className='w-6 h-6'
+                                 />
+                              </button>
+                           )}
+                           <div className='pt-16 col-span-2 lg:col-span-1'>
+                              <div className='flex flex-col gap-6'>
+                                 <div className='w-full'>
+                                    <Input
+                                       type='text'
+                                       label='Stream Title'
+                                       id={`streaming_sources[${index}].stream_title`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       nameW={watch(
+                                          `streaming_sources[${index}].stream_title`
+                                       )}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.stream_title
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <TextArea
+                                       label='Portrait Watermark(json)'
+                                       id={`streaming_sources[${index}].portrait_watermark`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       nameW={portrait_watermark}
+                                       topLabel='Portrait Watermark'
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.portrait_watermark
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <TextArea
+                                       label='Landscape Watermark(json)'
+                                       id={`streaming_sources[${index}].landscape_watermark`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       nameW={landscape_watermark}
+                                       topLabel='Landscape Watermark'
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.landscape_watermark
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <Input
+                                       label='Stream URL'
+                                       type='text'
+                                       id={`streaming_sources[${index}].stream_url`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.stream_url
+                                       }
+                                    />
+                                 </div>
+                              </div>
+                           </div>
+                           <div className='pt-16 col-span-2 lg:col-span-1'>
+                              <div className='flex flex-col gap-6'>
+                                 <div className='w-full'>
+                                    <Select
+                                       label='Resulation'
+                                       option={ResolutionOptions}
+                                       id={`streaming_sources[${index}].resolution`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.resolution
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <Select
+                                       label='Is Premium'
+                                       option={PremiumOptions}
+                                       id={`streaming_sources[${index}].is_premium`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       setValue={setValue}
+                                       //    defaultValue={
+                                       //     matchResult?.status === true ? 'Active' : 'Inactive'
+                                       //  }
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.is_premium === true
+                                             ? 'Active'
+                                             : 'Inactive'
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <Select
+                                       label='Platform'
+                                       option={PlatformOptions}
+                                       id={`streaming_sources[${index}].platform`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.platform
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <Select
+                                       label='Status'
+                                       option={StatusOptions}
+                                       id={`streaming_sources[${index}].stream_status`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.stream_status === true
+                                             ? 'Active'
+                                             : 'Inactive'
+                                       }
+                                    />
+                                 </div>
+                                 <div className='w-full'>
+                                    <Select
+                                       label='Stream Type'
+                                       option={StreamTypeOptions}
+                                       id={`streaming_sources[${index}].stream_type`}
+                                       required
+                                       register={register}
+                                       errors={errors}
+                                       nameW={watch(
+                                          `streaming_sources[${index}].stream_type`
+                                       )}
+                                       index={index}
+                                       setValue={setValue}
+                                       defaultValue={
+                                          defaultData?.streaming_sources[index]
+                                             ?.stream_type
+                                       }
+                                       streamingKey={
+                                          defaultData &&
+                                          defaultData?.streaming_sources[index]
+                                             ?.stream_key
+                                       }
+                                    />
+                                 </div>
+                              </div>
+                           </div>
+                           <div className='pt-16 col-span-2'>
+                              {watch(
+                                 `streaming_sources[${index}].stream_type`
+                              ) === 'Restricted' && (
+                                 <StreamItemFields
+                                    itemIndex={index}
+                                    errors={errors}
+                                    control={control}
+                                    register={register}
+                                    headers={
+                                       defaultData?.streaming_sources[index]
+                                          ?.headers
+                                    }
+                                    setValue={setValue}
+                                 />
+                              )}
+                           </div>
+                        </div>
                      ))}
 
                      {/* Streaming UI */}
@@ -926,23 +1210,22 @@ const UpdateMatch = ({ matchId }) => {
                      <div className='my-4'>
                         <button
                            type='button'
-                           // onClick={() => {
-
-                           //    // append({
-                           //    //    stream_title: '',
-                           //    //    portrait_watermark: '',
-                           //    //    landscape_watermark: '',
-                           //    //    stream_url: '',
-                           //    //    resolution: '',
-                           //    //    is_premium: '',
-                           //    //    platform: '',
-                           //    //    stream_status: '',
-                           //    //    stream_type: '',
-                           //    //    stream_key: '',
-                           //    //    headers: []
-                           //    // });
-                           // }}
-                           onClick={handleAddMore}
+                           onClick={() =>
+                              append({
+                                 stream_title: '',
+                                 portrait_watermark: '',
+                                 landscape_watermark: '',
+                                 stream_url: '',
+                                 resolution: '',
+                                 is_premium: '',
+                                 platform: '',
+                                 stream_status: '',
+                                 stream_type: '',
+                                 stream_key: '',
+                                 headers: []
+                              })
+                           }
+                           // onClick={handleAddMore}
                            className='absolute right-8 bottom-4 bg-teal-600 text-sm px-2 py-2 w-24 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'
                         >
                            Add More

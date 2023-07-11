@@ -2,7 +2,10 @@
 
 import ClientOnly from '@/components/client/clientOnly';
 import MyFormComponent from '@/components/demo3';
-import { ResolutionOptions } from '@/components/helper/selectOptions';
+import {
+   ImageTypeOptions,
+   ResolutionOptions
+} from '@/components/helper/selectOptions';
 import Select from '@/components/Input/Select';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -103,6 +106,8 @@ export default function Dashboard() {
    } = useForm();
 
    const { errors } = formState;
+
+   const team_one_image = watch('team_one_image');
 
    const handleClick = () => {
       setIsOpen(prevState => !prevState);
@@ -304,6 +309,24 @@ export default function Dashboard() {
             <button type='button' onClick={fetchData}>
                Get Data
             </button>
+            <div className='py-32 px-24'>
+               <div className='w-full'>
+                  <Select
+                     label='Image Type'
+                     option={ImageTypeOptions}
+                     register={register}
+                     id='team_one_image'
+                     required={true}
+                     errors={errors}
+                     nameW={team_one_image}
+                     // imgBody={team_one_imageBody}
+                     // imgUrl={teamOneImageUrl}
+                     setValue={setValue}
+                     // defaultValue={defaultData?.team_one_image}
+                     flag='team_one_image'
+                  />
+               </div>
+            </div>
          </DashboardLayout>
       </ClientOnly>
    );

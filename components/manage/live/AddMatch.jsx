@@ -1,7 +1,7 @@
 'use client';
 //Global Package Import
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { AiOutlineHome } from 'react-icons/ai';
@@ -148,6 +148,30 @@ export default function AddMatch() {
       control
    });
 
+   useEffect(() => {
+      if (team_one_image === 'Image') {
+         setTeamoneUrl('');
+      }
+      if (team_one_image === 'Url') {
+         setFileOne('');
+         setImageOneSrc('');
+      }
+      if (team_two_image === 'Image') {
+         setTeamtwoUrl('');
+      }
+      if (team_two_image === 'Url') {
+         setFileTwo('');
+         setImageTwoSrc('');
+      }
+   }, [
+      team_one_image,
+      team_two_image,
+      setTeamoneUrl,
+      setTeamtwoUrl,
+      setFileOne,
+      setFileTwo
+   ]);
+
    const handleFileChange = (event, imgSrc) => {
       const file = event.target.files[0];
       console.log('file', file);
@@ -180,11 +204,38 @@ export default function AddMatch() {
       setImageTwoSrc(null);
    };
 
+   // const teamOneImageUrl = (
+   //    <div className='w-full flex flex-col gap-2'>
+   //       <div className='relative h-11 w-full min-w-[200px]'>
+   //          <input
+   //             id='teamTwo'
+   //             required
+   //             value={teamoneUrl}
+   //             onChange={e => setTeamoneUrl(e.target.value)}
+   //             className={`peer h-full w-full rounded-[7px] border border-blue-gray-200 bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-cyan-500 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50`}
+   //             placeholder=' '
+   //             type='text'
+   //          />
+   //          <label
+   //             for='teamtwo'
+   //             className="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-cyan-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-cyan-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-cyan-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
+   //          >
+   //             Image Url
+   //          </label>
+   //       </div>
+   //       {/* {teamoneUrl.length === 0 && (
+   //          <div className='py-2 text-rose-400 text-sm font-semibold'>
+   //             Team Two Image Url is required
+   //          </div>
+   //       )} */}
+   //    </div>
+   // );
+
    const teamOneImageUrl = (
       <div className='w-full flex flex-col gap-2'>
          <div className='relative h-11 w-full min-w-[200px]'>
             <input
-               id='teamTwo'
+               id='teamOne'
                required
                value={teamoneUrl}
                onChange={e => setTeamoneUrl(e.target.value)}
@@ -193,19 +244,58 @@ export default function AddMatch() {
                type='text'
             />
             <label
-               for='teamtwo'
+               for='teamOne'
                className="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-cyan-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-cyan-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-cyan-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
             >
                Image Url
             </label>
          </div>
-         {/* {teamoneUrl.length === 0 && (
-            <div className='py-2 text-rose-400 text-sm font-semibold'>
-               Team Two Image Url is required
+         {teamoneUrl?.length > 0 && (
+            <div className='w-full h-[256px] rounded-md relative'>
+               <img
+                  src={teamoneUrl}
+                  alt='Image Preview'
+                  className='w-2/3 h-2/3 object-contain rounded-md'
+                  // onMouseEnter={onMouseEnterPreview}
+                  // onMouseLeave={onMouseLeavePreview}
+               />
             </div>
-         )} */}
+         )}
+
+         {/* {teamoneUrl.length === 0 && (
+          <div className='py-2 text-rose-400 text-sm font-semibold'>
+             Team Two Image Url is required
+          </div>
+       )} */}
       </div>
    );
+
+   // const teamTwoImageUrl = (
+   //    <div className='w-full flex flex-col gap-2'>
+   //       <div className='relative h-11 w-full min-w-[200px]'>
+   //          <input
+   //             id='teamTwo'
+   //             required
+   //             value={teamtwoUrl}
+   //             onChange={e => setTeamtwoUrl(e.target.value)}
+   //             className={`peer h-full w-full rounded-[7px] border border-blue-gray-200 bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-cyan-500 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50`}
+   //             placeholder=' '
+   //             type='text'
+   //          />
+   //          <label
+   //             for='teamtwo'
+   //             className="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-cyan-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-cyan-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-cyan-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500"
+   //          >
+   //             Image Url
+   //          </label>
+   //       </div>
+   //       {/* {teamoneUrl.length < 1 && (
+   //          <div className='py-2 text-rose-400 text-sm font-semibold'>
+   //             Team Two Image Url is required
+   //          </div>
+   //       )} */}
+   //    </div>
+   // );
 
    const teamTwoImageUrl = (
       <div className='w-full flex flex-col gap-2'>
@@ -226,28 +316,128 @@ export default function AddMatch() {
                Image Url
             </label>
          </div>
-         {/* {teamoneUrl.length < 1 && (
-            <div className='py-2 text-rose-400 text-sm font-semibold'>
-               Team Two Image Url is required
+
+         {teamtwoUrl?.length > 0 && (
+            <div className='w-full h-[256px] rounded-md relative'>
+               <img
+                  src={teamtwoUrl}
+                  alt='Image Preview'
+                  className='w-2/3 h-2/3 object-contain rounded-md'
+                  // onMouseEnter={onMouseEnterPreview}
+                  // onMouseLeave={onMouseLeavePreview}
+               />
             </div>
-         )} */}
+         )}
+
+         {/* {teamoneUrl.length < 1 && (
+          <div className='py-2 text-rose-400 text-sm font-semibold'>
+             Team Two Image Url is required
+          </div>
+       )} */}
       </div>
    );
+
+   // const team_one_imageBody = (
+   //    <div className='w-full pt-2'>
+   //       {/* <input
+   //          type='file'
+   //          accept='image/*'
+   //          onChange={e => handleFileChange(e, 'team_one_image_src')}
+   //       /> */}
+   //       {/* Display Image Preview */}
+   //       {imageOneSrc ? (
+   //          <div className='w-full h-auto rounded-md relative'>
+   //             <img
+   //                src={imageOneSrc}
+   //                alt='Image Preview'
+   //                className='w-full h-auto rounded-md'
+   //                // onMouseEnter={onMouseEnterPreview}
+   //                // onMouseLeave={onMouseLeavePreview}
+   //             />
+   //             <div
+   //                // className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-gray-200
+   //                // ${isHover ? 'flex items-center justify-center' : 'hidden'}`}
+   //                className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-rose-200 flex items-center justify-center
+   //                `}
+   //                onClick={handleImageOneInput}
+   //             >
+   //                <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+   //             </div>
+   //             {/* {isHover && (
+   //                <div
+   //                   className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
+   //                   onClick={() => setImageSrc(null)}
+   //                >
+   //                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+   //                </div>
+   //             )} */}
+   //          </div>
+   //       ) : (
+   //          <label
+   //             for='dropzone-file'
+   //             className='flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600'
+   //          >
+   //             <div className='flex flex-col items-center justify-center pt-5 pb-6'>
+   //                <svg
+   //                   aria-hidden='true'
+   //                   className='w-10 h-10 mb-3 text-gray-400'
+   //                   fill='none'
+   //                   stroke='currentColor'
+   //                   viewBox='0 0 24 24'
+   //                   xmlns='http://www.w3.org/2000/svg'
+   //                >
+   //                   <path
+   //                      stroke-linecap='round'
+   //                      stroke-linejoin='round'
+   //                      stroke-width='2'
+   //                      d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+   //                   ></path>
+   //                </svg>
+   //                <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
+   //                   <span className='font-semibold'>Click to upload</span> or
+   //                   drag and drop
+   //                </p>
+   //                <p className='text-xs text-gray-500 dark:text-gray-400'>
+   //                   SVG, PNG, JPG or GIF (MAX. 800x400px)
+   //                </p>
+   //             </div>
+   //             <input
+   //                id='dropzone-file'
+   //                type='file'
+   //                accept='image/*'
+   //                onChange={e => handleFileChange(e, 'team_one_image_src')}
+   //                className='hidden'
+   //             />
+   //          </label>
+   //       )}
+   //    </div>
+   // );
 
    const team_one_imageBody = (
       <div className='w-full pt-2'>
          {/* <input
-            type='file'
-            accept='image/*'
-            onChange={e => handleFileChange(e, 'team_one_image_src')}
-         /> */}
+          type='file'
+          accept='image/*'
+          onChange={e => handleFileChange(e, 'team_one_image_src')}
+       /> */}
          {/* Display Image Preview */}
+
+         {/* {defaultData?.team_one_image && (
+            <img
+               src={defaultData?.team_one_image}
+               alt='Image Preview'
+               className='w-full h-auto rounded-md'
+               // onMouseEnter={onMouseEnterPreview}
+               // onMouseLeave={onMouseLeavePreview}
+            />
+         )} */}
+
          {imageOneSrc ? (
-            <div className='w-full h-auto rounded-md relative'>
+            <div className='w-full h-64 rounded-md relative'>
                <img
                   src={imageOneSrc}
                   alt='Image Preview'
-                  className='w-full h-auto rounded-md'
+                  className='flex items-center justify-center w-full h-64 rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -255,19 +445,19 @@ export default function AddMatch() {
                   // className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-gray-200
                   // ${isHover ? 'flex items-center justify-center' : 'hidden'}`}
                   className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-rose-200 flex items-center justify-center
-                  `}
+                `}
                   onClick={handleImageOneInput}
                >
                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
                </div>
                {/* {isHover && (
-                  <div
-                     className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
-                     onClick={() => setImageSrc(null)}
-                  >
-                     <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
-                  </div>
-               )} */}
+                <div
+                   className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
+                   onClick={() => setImageSrc(null)}
+                >
+                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+                </div>
+             )} */}
             </div>
          ) : (
             <label
@@ -310,20 +500,107 @@ export default function AddMatch() {
       </div>
    );
 
+   // const team_two_imageBody = (
+   //    <div className='w-full pt-2'>
+   //       {/* <input
+   //          type='file'
+   //          accept='image/*'
+   //          onChange={e => handleFileChange(e, 'team_two_image_src')}
+   //       /> */}
+   //       {/* Display Image Preview */}
+   //       {imageTwoSrc ? (
+   //          <div className='w-full h-auto rounded-md relative'>
+   //             <img
+   //                src={imageTwoSrc}
+   //                alt='Image Preview'
+   //                className='w-full h-auto rounded-md'
+   //                // onMouseEnter={onMouseEnterPreview}
+   //                // onMouseLeave={onMouseLeavePreview}
+   //             />
+   //             <div
+   //                // className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-gray-200
+   //                // ${isHover ? 'flex items-center justify-center' : 'hidden'}`}
+   //                className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-rose-200 flex items-center justify-center
+   //                `}
+   //                onClick={handleImageTwoInput}
+   //             >
+   //                <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+   //             </div>
+   //             {/* {isHover && (
+   //                <div
+   //                   className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
+   //                   onClick={() => setImageSrc(null)}
+   //                >
+   //                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+   //                </div>
+   //             )} */}
+   //          </div>
+   //       ) : (
+   //          <label
+   //             for='dropzone-file'
+   //             className='flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600'
+   //          >
+   //             <div className='flex flex-col items-center justify-center pt-5 pb-6'>
+   //                <svg
+   //                   aria-hidden='true'
+   //                   className='w-10 h-10 mb-3 text-gray-400'
+   //                   fill='none'
+   //                   stroke='currentColor'
+   //                   viewBox='0 0 24 24'
+   //                   xmlns='http://www.w3.org/2000/svg'
+   //                >
+   //                   <path
+   //                      stroke-linecap='round'
+   //                      stroke-linejoin='round'
+   //                      stroke-width='2'
+   //                      d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+   //                   ></path>
+   //                </svg>
+   //                <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
+   //                   <span className='font-semibold'>Click to upload</span> or
+   //                   drag and drop
+   //                </p>
+   //                <p className='text-xs text-gray-500 dark:text-gray-400'>
+   //                   SVG, PNG, JPG or GIF (MAX. 800x400px)
+   //                </p>
+   //             </div>
+   //             <input
+   //                id='dropzone-file'
+   //                type='file'
+   //                accept='image/*'
+   //                onChange={e => handleFileChange(e, 'team_two_image_src')}
+   //                className='hidden'
+   //             />
+   //          </label>
+   //       )}
+   //    </div>
+   // );
+
    const team_two_imageBody = (
       <div className='w-full pt-2'>
          {/* <input
-            type='file'
-            accept='image/*'
-            onChange={e => handleFileChange(e, 'team_two_image_src')}
-         /> */}
+          type='file'
+          accept='image/*'
+          onChange={e => handleFileChange(e, 'team_two_image_src')}
+       /> */}
          {/* Display Image Preview */}
+
+         {/* {defaultData?.team_two_image && (
+            <img
+               src={defaultData?.team_two_image}
+               alt='Image Preview'
+               className='w-full h-auto rounded-md'
+               // onMouseEnter={onMouseEnterPreview}
+               // onMouseLeave={onMouseLeavePreview}
+            />
+         )} */}
+
          {imageTwoSrc ? (
-            <div className='w-full h-auto rounded-md relative'>
+            <div className=' w-full h-64 rounded-md relative'>
                <img
                   src={imageTwoSrc}
                   alt='Image Preview'
-                  className='w-full h-auto rounded-md'
+                  className='flex items-center justify-center w-full h-64 rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -331,19 +608,19 @@ export default function AddMatch() {
                   // className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-gray-200
                   // ${isHover ? 'flex items-center justify-center' : 'hidden'}`}
                   className={`absolute right-2 top-2 cursor-pointer w-10 h-10 rounded-md bg-rose-200 flex items-center justify-center
-                  `}
+                `}
                   onClick={handleImageTwoInput}
                >
                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
                </div>
                {/* {isHover && (
-                  <div
-                     className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
-                     onClick={() => setImageSrc(null)}
-                  >
-                     <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
-                  </div>
-               )} */}
+                <div
+                   className='w-10 h-10 rounded-md bg-gray-200 flex items-center justify-center'
+                   onClick={() => setImageSrc(null)}
+                >
+                   <MdOutlineDeleteSweep className='w-6 h-6 text-rose-400' />
+                </div>
+             )} */}
             </div>
          ) : (
             <label
