@@ -113,6 +113,39 @@ const apiSlice = createApi({
          providesTags: ['Match']
       }),
 
+      updateMatch: builder.mutation({
+         query: ({ data, matchId }) => {
+            console.log('Match Info', matchId, data);
+            return {
+               url: `/match/${matchId}`,
+               method: 'PUT',
+               body: data,
+               headers: {
+                  'Content-type': 'application/json'
+               }
+            };
+         },
+         invalidatesTags: ['Match']
+      }),
+
+      updateMatchStatus: builder.mutation({
+         query: ({ data, matchId }) => {
+            console.log('Match Info', matchId, data);
+            const statusData = {
+               status: data
+            };
+            return {
+               url: `/match/status/${matchId}`,
+               method: 'PUT',
+               body: statusData,
+               headers: {
+                  'Content-type': 'application/json'
+               }
+            };
+         },
+         invalidatesTags: ['Match']
+      }),
+
       deleteMatch: builder.mutation({
          query: matchId => ({
             url: `/match/${matchId}`,
@@ -176,6 +209,8 @@ export const {
    usePostFixuresMutation,
    useCreateMatchMutation,
    useAllMatchMutation,
+   useUpdateMatchMutation,
+   useUpdateMatchStatusMutation,
    useDeleteMatchMutation,
    useGetAllMatchQuery,
    useGetSingleMatchQuery,

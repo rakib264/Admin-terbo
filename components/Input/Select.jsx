@@ -80,29 +80,34 @@ const Select = ({
 
          {nameW === 'Url' && <div>{imgUrl}</div>}
          {nameW === 'Image' && <div>{imgBody}</div>}
+         {nameW === 'None' && <div></div>}
          {nameW !== 'Image' &&
             nameW !== 'Url' &&
             defaultValue !== undefined &&
             flag === 'team_one_image' && (
-               <img
-                  src={defaultValue}
-                  alt='Image Preview'
-                  className='w-full h-[256px] object-cover rounded-md'
-                  // onMouseEnter={onMouseEnterPreview}
-                  // onMouseLeave={onMouseLeavePreview}
-               />
+               <div className='w-full h-[300px] object-cover rounded-md flex items-center justify-center bg-gray-200'>
+                  <img
+                     src={defaultValue}
+                     alt='Image Preview'
+                     className='w-40 h-36 object-cover rounded-md'
+                     // onMouseEnter={onMouseEnterPreview}
+                     // onMouseLeave={onMouseLeavePreview}
+                  />
+               </div>
             )}
          {nameW !== 'Image' &&
             nameW !== 'Url' &&
             defaultValue !== undefined &&
             flag === 'team_two_image' && (
-               <img
-                  src={defaultValue}
-                  alt='Image Preview'
-                  className='w-full h-[256px] object-cover rounded-md'
-                  // onMouseEnter={onMouseEnterPreview}
-                  // onMouseLeave={onMouseLeavePreview}
-               />
+               <div className='w-full h-[300px] object-cover rounded-md flex items-center justify-center bg-gray-200'>
+                  <img
+                     src={defaultValue}
+                     alt='Image Preview'
+                     className='w-40 h-36 object-cover rounded-md'
+                     // onMouseEnter={onMouseEnterPreview}
+                     // onMouseLeave={onMouseLeavePreview}
+                  />
+               </div>
             )}
       </div>
    );

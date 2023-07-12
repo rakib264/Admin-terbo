@@ -4,10 +4,16 @@ import Breadcumbs from '@/components/Breadcumbs/Breadcumbs';
 import ClientOnly from '@/components/client/clientOnly';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import MatchList from '@/components/manage/live/MatchListTable';
+import Loading from '@/components/Spinner/Loading';
 import Spinner from '@/components/Spinner/page';
-import { useGetAllMatchQuery } from '@/features/api/apiSlice';
+import Progressbar from '@/components/Spinner/Progressbar';
+import {
+   useDeleteMatchMutation,
+   useGetAllMatchQuery,
+   useUpdateMatchStatusMutation
+} from '@/features/api/apiSlice';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { AiOutlineHome } from 'react-icons/ai';
 
@@ -87,7 +93,15 @@ const matchData = [
 ];
 
 const ManageLive = () => {
-   const { data: matchEntities, isSuccess, isError } = useGetAllMatchQuery();
+   const [loading, setLoading] = useState(false);
+
+   const {
+      data: matchEntities,
+      isLoading,
+      isSuccess,
+      isError,
+      refetch
+   } = useGetAllMatchQuery();
    // const [allMatch, { data: matchEntities }] = useAllMatchMutation();
    //const [isOpen, setIsOpen] = useState(false);
    // const handleClick = () => {
@@ -95,7 +109,11 @@ const ManageLive = () => {
    // };
 
    useEffect(() => {
-      if (matchEntities?.length > 0) {
+      if (isLoading) {
+         setLoading(true);
+      }
+      if (isSuccess) {
+         setLoading(false);
          toast.success('Match Data Fetched Successfully');
       }
       // try {
@@ -105,16 +123,57 @@ const ManageLive = () => {
       //    console.log('Error: ', err);
       //    toast.error('Something went wrong fetching matches');
       // }
-   }, []);
+   }, [isLoading, isSuccess, toast, setLoading]);
+
+   const [
+      deleteMatch,
+      {
+         isLoading: isDeleteLoading,
+         isSuccess: isDeleteSuccess,
+         isError: isDeleteError
+      }
+   ] = useDeleteMatchMutation();
+
+   useEffect(() => {
+      if (isDeleteLoading) {
+         setLoading(true);
+      }
+      if (isDeleteSuccess) {
+         setLoading(false);
+         refetch();
+         toast.success('Match Deleted successfully');
+      }
+   }, [isDeleteLoading, isDeleteSuccess, toast, setLoading, refetch]);
 
    console.log('Match data: ', matchEntities);
+
+   const [
+      updateMatchStatus,
+      { data, isSuccess: isStatusSuccess, isLoading: isStatusLoading }
+   ] = useUpdateMatchStatusMutation();
+
+   console.log(data);
+
+   useEffect(() => {
+      if (isStatusLoading) {
+         setLoading(true);
+      }
+      if (isStatusSuccess) {
+         setLoading(false);
+         refetch();
+         toast.success('Match Status updated');
+      }
+   }, [isStatusLoading, isStatusSuccess, setLoading, toast, refetch]);
 
    return (
       <ClientOnly>
          <DashboardLayout>
             <div className='px-8 py-4 relative'>
+               <Progressbar loadingState={40} />
                <div className='flex flex-row items-center mb-6 divide-y-1 divide-gray-400'>
-                  <h3 className='text-xl text-gray-800 font-bold'>Add New</h3>
+                  <h3 className='text-xl text-gray-800 font-bold'>
+                     Match List
+                  </h3>
                   <Breadcumbs
                      srcIcon={AiOutlineHome}
                      rootLabel='Live Matches'
@@ -125,19 +184,26 @@ const ManageLive = () => {
                      Add Match
                   </button>
                </Link>
-               <div className='py-4'>
-                  {/* {data?.length > 0 && (
+               {loading ? (
+                  <Loading />
+               ) : (
+                  <div className='py-4'>
+                     {/* {data?.length > 0 && (
                      <MatchList columns={matchColumns} entities={data} />
                   )} */}
-                  {matchEntities && matchEntities?.data?.length > 0 ? (
-                     <MatchList
-                        columns={matchColumns}
-                        entities={matchEntities?.data}
-                     />
-                  ) : (
-                     <Spinner />
-                  )}
-               </div>
+                     {matchEntities && matchEntities?.data?.length > 0 ? (
+                        <MatchList
+                           columns={matchColumns}
+                           entities={matchEntities?.data}
+                           deleteMatch={deleteMatch}
+                           isDeleteSuccess={isDeleteSuccess}
+                           updateMatchStatus={updateMatchStatus}
+                        />
+                     ) : (
+                        <Spinner />
+                     )}
+                  </div>
+               )}
             </div>
          </DashboardLayout>
       </ClientOnly>

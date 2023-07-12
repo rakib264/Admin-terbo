@@ -16,8 +16,8 @@ const SideBar = forwardRef(({ sidebarOpen }, ref) => {
          {
             icon: IoDesktopOutline,
             label: 'Dashboard',
-            active: pathname === '/dashboard',
-            href: '/dashboard'
+            active: pathname === '/',
+            href: '/'
          },
          {
             icon: IoPlayCircle,

@@ -14,12 +14,17 @@ import Input from '@/components/Input/InputCom';
 import Select from '@/components/Input/Select';
 import TextArea from '@/components/Input/Textarea';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useGetSingleMatchQuery } from '@/features/api/apiSlice';
+import Loading from '@/components/Spinner/Loading';
+import {
+   useGetSingleMatchQuery,
+   useUpdateMatchMutation
+} from '@/features/api/apiSlice';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { AiOutlineHome } from 'react-icons/ai';
+import toast from 'react-hot-toast';
+import { AiOutlineDelete, AiOutlineHome } from 'react-icons/ai';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
 
 //Custom Component
@@ -122,14 +127,13 @@ const StreamItemFields = ({
                   key={field.id}
                   className='w-full relative flex flex-col gap-2'
                >
-                  {i > 0 && (
-                     <button
-                        onClick={() => remove(i)}
-                        className='absolute right-0 -top-10 flex items-center justify-center bg-teal-600 text-sm p-1 w-8 h-8 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'
-                     >
-                        <MdOutlineDeleteSweep className='w-6 h-6' />
-                     </button>
-                  )}
+                  <button
+                     onClick={() => remove(i)}
+                     className='absolute right-0 -top-[12px] flex items-center justify-center bg-cyan-700 text-sm p-1 w-8 h-8 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-cyan-800 outline-none focus:outline-none'
+                  >
+                     <AiOutlineDelete className='w-6 h-6' />
+                  </button>
+
                   <div className='w-full md:gap-6 md:flex md:items-center md:justify-between'>
                      <div className='w-full'>
                         <Input
@@ -165,9 +169,9 @@ const StreamItemFields = ({
                      console.log('Clicked');
                      append({});
                   }}
-                  className='absolute right-0 bottom-0 bg-teal-600 text-sm px-2 py-2 w-24 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'
+                  className='absolute right-0 bottom-0 bg-cyan-700 px-3 py-2 w-24 rounded-md text-white text-xs shadow-sm shadow-gray-900 cursor-pointer hover:bg-cyan-800 outline-none focus:outline-none'
                >
-                  Add
+                  Add Header
                </button>
             </div>
          </div>
@@ -188,12 +192,30 @@ const UpdateMatch = ({ matchId }) => {
    // const [arrayLength, setArrayLength] = useState(
    //    defaultData?.streaming_sources?.length
    // );
-
+   const [loading, setLoading] = useState(false);
    //const [dataArray, setDataArray] = useState(null);
 
-   const { data: getMatchData } = useGetSingleMatchQuery(matchId);
+   const {
+      data: getMatchData,
+      isLoading: fetchedIsLoading,
+      isSuccess: fetchedIsSuccess,
+      refetch
+   } = useGetSingleMatchQuery(matchId);
 
    const defaultData = getMatchData?.data;
+
+   const [
+      updateMatch,
+      {
+         data: updatedData,
+         isLoading: updatedIsLoading,
+         isSuccess: updateIsSuccess,
+         isError: updateIsError
+      }
+   ] = useUpdateMatchMutation();
+
+   //  console.log('Updated Data: ', updatedData);
+
    // console.log('defaultData', defaultData);
    //    console.log(format(new Date(defaultData?.time), 'yyyy-MM-dd'));
 
@@ -233,25 +255,27 @@ const UpdateMatch = ({ matchId }) => {
       watch,
       setValue,
       reset
-   } = useForm({
-      defaultValues: {
-         streaming_sources: [
-            {
-               stream_title: '',
-               portrait_watermark: '',
-               landscape_watermark: '',
-               stream_url: '',
-               resolution: '',
-               is_premium: '',
-               platform: '',
-               stream_status: '',
-               stream_type: '',
-               stream_key: '',
-               headers: []
-            }
-         ]
-      }
-   });
+   } = useForm();
+
+   // {
+   //    defaultValues: {
+   //       streaming_sources: [
+   //          // {
+   //          //    stream_title: '',
+   //          //    portrait_watermark: '',
+   //          //    landscape_watermark: '',
+   //          //    stream_url: '',
+   //          //    resolution: '',
+   //          //    is_premium: '',
+   //          //    platform: '',
+   //          //    stream_status: '',
+   //          //    stream_type: '',
+   //          //    stream_key: '',
+   //          //    headers: []
+   //          // }
+   //       ]
+   //    }
+   // }
 
    const { errors } = formState;
 
@@ -267,6 +291,24 @@ const UpdateMatch = ({ matchId }) => {
    // const team_one_url = watch('team_one_url');
    // const team_two_url = watch('team_two_url');
 
+   // const { fields, append, remove } = useFieldArray({
+   //    name: 'streaming_sources',
+   //    control
+   // });
+
+   // useEffect(() => {
+   //    if (headers?.length > 0) {
+   //       let initialFieldValues = JSON.parse(headers);
+   //       let newFields = [];
+
+   //       // Push new field objects to newFields array
+   //       for (let i = 0; i < initialFieldValues.length; i++) {
+   //          newFields.push({ ...initialFieldValues[i] });
+   //       }
+   //       setValue(`streaming_sources[${itemIndex}].headers`, newFields);
+   //    }
+   // }, [headers, setValue]);
+
    const { fields, append, remove } = useFieldArray({
       name: 'streaming_sources',
       control
@@ -274,16 +316,44 @@ const UpdateMatch = ({ matchId }) => {
 
    useEffect(() => {
       if (defaultData?.streaming_sources?.length > 0) {
-         let initialFieldValues = defaultData?.streaming_sources;
+         let initialFieldValues = defaultData.streaming_sources;
          let newFields = [];
 
          // Push new field objects to newFields array
          for (let i = 0; i < initialFieldValues.length; i++) {
             newFields.push({ ...initialFieldValues[i] });
          }
-         setValue(`streaming_sources`, newFields);
+         setValue('streaming_sources', newFields);
+      } else {
+         setValue('streaming_sources', []);
       }
-   }, [defaultData, setValue]);
+   }, [defaultData?.streaming_sources, setValue]);
+
+   const handleDelete = index => {
+      console.log('IIndex: ', index);
+      if (index === 0 && fields.length === 1) {
+         // If it's the first and only index, reset the value
+         setValue('streaming_sources', []);
+      } else {
+         
+         remove(index);
+      }
+   };
+
+   // useEffect(() => {
+   //    if (defaultData?.streaming_sources?.length > 0) {
+   //       let initialFieldValues = defaultData?.streaming_sources;
+   //       let newFields = [];
+
+   //       // Push new field objects to newFields array
+   //       for (let i = 0; i < initialFieldValues.length; i++) {
+   //          newFields.push({ ...initialFieldValues[i] });
+   //       }
+   //       setValue(`streaming_sources`, newFields);
+   //    } else {
+   //       setValue(`streaming_sources`, []);
+   //    }
+   // }, [defaultData?.streaming_sources, setValue]);
 
    useEffect(() => {
       if (team_one_image === 'Image') {
@@ -292,6 +362,16 @@ const UpdateMatch = ({ matchId }) => {
       if (team_one_image === 'Url') {
          setFileOne('');
          setImageOneSrc('');
+      }
+      if (team_one_image === 'None') {
+         setTeamoneUrl('');
+         setFileOne('');
+         setImageOneSrc('');
+      }
+      if (team_two_image === 'None') {
+         setTeamtwoUrl('');
+         setFileTwo('');
+         setImageTwoSrc('');
       }
       if (team_two_image === 'Image') {
          setTeamtwoUrl('');
@@ -307,6 +387,36 @@ const UpdateMatch = ({ matchId }) => {
       setTeamtwoUrl,
       setFileOne,
       setFileTwo
+   ]);
+
+   useEffect(() => {
+      if (fetchedIsLoading) {
+         setLoading(true);
+      }
+      if (fetchedIsSuccess) {
+         setLoading(false);
+      }
+   }, [fetchedIsLoading, fetchedIsSuccess, setLoading]);
+
+   useEffect(() => {
+      if (updatedIsLoading) {
+         setLoading(true);
+      }
+      if (updateIsSuccess) {
+         refetch();
+         setLoading(false);
+         toast.success('Match updated successfully');
+      }
+      if (updateIsError) {
+         toast.error('Something went wrong while updating the match');
+      }
+   }, [
+      updatedIsLoading,
+      updateIsSuccess,
+      updateIsError,
+      toast,
+      refetch,
+      setLoading
    ]);
 
    // const [newFields, setNewField] = useState(defaultData?.streaming_sources);
@@ -356,11 +466,11 @@ const UpdateMatch = ({ matchId }) => {
             </label>
          </div>
          {teamoneUrl.length > 0 && (
-            <div className='w-full h-[256px] rounded-md relative'>
+            <div className='w-full h-[300px] rounded-md relative flex items-center justify-center bg-gray-200'>
                <img
                   src={teamoneUrl}
                   alt='Image Preview'
-                  className='w-2/3 h-2/3 object-contain rounded-md'
+                  className='w-40 h-36 object-cover rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -396,11 +506,11 @@ const UpdateMatch = ({ matchId }) => {
          </div>
 
          {teamtwoUrl.length > 0 && (
-            <div className='w-full h-[256px] rounded-md relative'>
+            <div className='w-full h-[300px] rounded-md relative flex items-center justify-center bg-gray-200'>
                <img
                   src={teamtwoUrl}
                   alt='Image Preview'
-                  className='w-2/3 h-2/3 object-contain rounded-md'
+                  className='w-40 h-36 object-cover rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -435,11 +545,11 @@ const UpdateMatch = ({ matchId }) => {
          )} */}
 
          {imageOneSrc ? (
-            <div className='w-full h-64 rounded-md relative'>
+            <div className='w-full h-[300px] rounded-md relative flex items-center justify-center bg-gray-200'>
                <img
                   src={imageOneSrc}
                   alt='Image Preview'
-                  className='flex items-center justify-center w-full h-64 rounded-md'
+                  className='w-40 h-36 object-cover rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -522,11 +632,11 @@ const UpdateMatch = ({ matchId }) => {
          )} */}
 
          {imageTwoSrc ? (
-            <div className=' w-full h-64 rounded-md relative'>
+            <div className=' w-full h-[300px] rounded-md relative flex items-center justify-center bg-gray-200'>
                <img
                   src={imageTwoSrc}
                   alt='Image Preview'
-                  className='flex items-center justify-center w-full h-64 rounded-md'
+                  className='w-40 h-36 object-cover rounded-md'
                   // onMouseEnter={onMouseEnterPreview}
                   // onMouseLeave={onMouseLeavePreview}
                />
@@ -592,6 +702,7 @@ const UpdateMatch = ({ matchId }) => {
    const onSubmit = async data => {
       console.log('Data :', data);
 
+      let result = {};
       let oneImage;
       let twoImage;
 
@@ -635,6 +746,70 @@ const UpdateMatch = ({ matchId }) => {
 
       console.log('teamoneUrl', teamoneUrl);
       console.log('teamtwoUrl', teamtwoUrl);
+
+      if (data) {
+         result.title = data.title;
+         result.time = data.time;
+         result.fixture_id = data.fixture_id;
+         result.status = data.status === 'Active' ? true : false;
+         result.team_one_name = data.team_one_name;
+         if (oneImage) {
+            result.team_one_image = oneImage;
+         } else if (teamoneUrl) {
+            result.team_one_image = teamoneUrl;
+         } else {
+            result.team_one_image = defaultData?.team_one_image;
+         }
+         // result.team_one_image = defaultData?.team_one_image
+         //    ? defaultData?.team_one_image
+         //    : oneImage
+         //    ? oneImage
+         //    : teamoneUrl;
+         result.team_two_name = data.team_two_name;
+         if (twoImage) {
+            result.team_two_image = twoImage;
+         } else if (teamtwoUrl) {
+            result.team_two_image = teamtwoUrl;
+         } else {
+            result.team_two_image = defaultData?.team_two_image;
+         }
+         // result.team_two_image = defaultData?.team_two_image
+         //    ? defaultData?.team_two_image
+         //    : twoImage
+         //    ? twoImage
+         //    : teamtwoUrl;
+
+         result.streaming_sources = data.streaming_sources.map(
+            (item, newIndex) => {
+               let newHeader = '';
+               if (item.headers.length > 0) {
+                  newHeader = JSON.stringify(item.headers);
+               }
+               // else {
+               //    newHeader = JSON.stringify(item.headers);
+               // }
+               let streamingStatus =
+                  item.stream_status === 'Active' ? true : false;
+               let streamingPremium = item.is_premium === 'Yes' ? true : false;
+               return {
+                  ...item,
+                  stream_status: streamingStatus,
+                  is_premium: streamingPremium,
+                  headers: newHeader
+               };
+            }
+         );
+      }
+      console.log('New Data', result);
+      try {
+         const matchObj = {
+            matchId: matchId,
+            data: result
+         };
+         updateMatch(matchObj);
+      } catch (err) {
+         console.log('Error: ', err);
+      }
    };
 
    return (
@@ -650,168 +825,185 @@ const UpdateMatch = ({ matchId }) => {
                   currentHref='/manage/live/edit'
                />
             </div>
-            <form
-               className='flex flex-col gap-8'
-               onSubmit={handleSubmit(onSubmit)}
-            >
-               <div className='flex flex-col gap-4'>
-                  <div className=' flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
-                     <h4 className='text-lg text-gray-800 font-semibold'>
-                        Match Information
-                     </h4>
-                     <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-                        <div className='col-span-2 lg:col-span-1'>
-                           <Input
-                              label='Match Title'
-                              id='title'
-                              required
-                              register={register}
-                              errors={errors}
-                              nameW={title}
-                              setValue={setValue}
-                              defaultValue={defaultData?.title}
-                           />
+            {loading === true ? (
+               <Loading />
+            ) : (
+               <form
+                  className='flex flex-col gap-8'
+                  onSubmit={handleSubmit(onSubmit)}
+               >
+                  <div className='flex flex-col gap-4'>
+                     <div className=' flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
+                        <h4 className='text-lg text-gray-800 font-semibold'>
+                           Match Information
+                        </h4>
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                           <div className='col-span-2 lg:col-span-1'>
+                              <Input
+                                 label='Match Title'
+                                 id='title'
+                                 required
+                                 register={register}
+                                 errors={errors}
+                                 nameW={title}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.title}
+                              />
+                           </div>
+                           <div className='col-span-2 lg:col-span-1'>
+                              {/* {console.log(
+                              'New: ',
+                              format(
+                                 new Date(`${defaultData?.time}`),
+                                 "yyyy-MM-dd'T'HH:mm",
+                                 {
+                                    awareOfUnicodeTokens: true
+                                 }
+                              )
+                           )} */}
+
+                              <DatePickerInput
+                                 label='Date'
+                                 id='time'
+                                 required
+                                 type='datetime-local'
+                                 register={register}
+                                 errors={errors}
+                                 nameW={time}
+                                 setValue={setValue}
+                                 defaultValue={
+                                    defaultData &&
+                                    format(
+                                       new Date(`${defaultData?.time}`),
+                                       "yyyy-MM-dd'T'HH:mm",
+                                       {
+                                          awareOfUnicodeTokens: true
+                                       }
+                                    )
+                                 }
+                              />
+                           </div>
                         </div>
-                        <div className='col-span-2 lg:col-span-1'>
-                           <DatePickerInput
-                              label='Date'
-                              id='time'
-                              required
-                              type='date'
-                              register={register}
-                              errors={errors}
-                              nameW={time}
-                              setValue={setValue}
-                              defaultValue={
-                                 defaultData &&
-                                 format(
-                                    new Date(defaultData?.time),
-                                    'yyyy-MM-dd'
-                                 )
-                              }
-                           />
-                        </div>
-                     </div>
-                     <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-                        <div className='col-span-2 lg:col-span-1'>
-                           <Input
-                              label='Fixure Id'
-                              id='fixture_id'
-                              required
-                              register={register}
-                              errors={errors}
-                              nameW={fixture_id}
-                              setValue={setValue}
-                              defaultValue={defaultData?.fixture_id}
-                           />
-                        </div>
-                        <div className='col-span-2 lg:col-span-1'>
-                           <Select
-                              label='Status'
-                              option={StatusOptions}
-                              register={register}
-                              id='status'
-                              required={true}
-                              errors={errors}
-                              setValue={setValue}
-                              defaultValue={
-                                 defaultData?.status === true
-                                    ? 'Active'
-                                    : 'Inactive'
-                              }
-                           />
+                        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                           <div className='col-span-2 lg:col-span-1'>
+                              <Input
+                                 label='Fixure Id'
+                                 id='fixture_id'
+                                 required
+                                 register={register}
+                                 errors={errors}
+                                 nameW={fixture_id}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.fixture_id}
+                              />
+                           </div>
+                           <div className='col-span-2 lg:col-span-1'>
+                              <Select
+                                 label='Status'
+                                 option={StatusOptions}
+                                 register={register}
+                                 id='status'
+                                 required={true}
+                                 errors={errors}
+                                 setValue={setValue}
+                                 defaultValue={
+                                    defaultData?.status === true
+                                       ? 'Active'
+                                       : 'Inactive'
+                                 }
+                              />
+                           </div>
                         </div>
                      </div>
                   </div>
-               </div>
-               <div className='flex flex-col gap-4'>
-                  <div className='grid grid-cols-2 gap-6'>
-                     <div className='col-span-2 lg:col-span-1 flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
-                        <h4 className='text-lg text-gray-800 font-semibold'>
-                           Team One Information
-                        </h4>
-                        <div className='w-full'>
-                           <Input
-                              label='Name'
-                              register={register}
-                              id='team_one_name'
-                              required={true}
-                              errors={errors}
-                              nameW={team_one_name}
-                              setValue={setValue}
-                              defaultValue={defaultData?.team_one_name}
-                           />
+                  <div className='flex flex-col gap-4'>
+                     <div className='grid grid-cols-2 gap-6'>
+                        <div className='col-span-2 lg:col-span-1 flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
+                           <h4 className='text-lg text-gray-800 font-semibold'>
+                              Team One Information
+                           </h4>
+                           <div className='w-full'>
+                              <Input
+                                 label='Name'
+                                 register={register}
+                                 id='team_one_name'
+                                 required={true}
+                                 errors={errors}
+                                 nameW={team_one_name}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.team_one_name}
+                              />
+                           </div>
+                           <div className='w-full'>
+                              <Select
+                                 label='Image Type'
+                                 option={ImageTypeOptions}
+                                 register={register}
+                                 id='team_one_image'
+                                 required={true}
+                                 errors={errors}
+                                 nameW={team_one_image}
+                                 imgBody={team_one_imageBody}
+                                 imgUrl={teamOneImageUrl}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.team_one_image}
+                                 flag='team_one_image'
+                              />
+                           </div>
                         </div>
-                        <div className='w-full'>
-                           <Select
-                              label='Image Type'
-                              option={ImageTypeOptions}
-                              register={register}
-                              id='team_one_image'
-                              required={true}
-                              errors={errors}
-                              nameW={team_one_image}
-                              imgBody={team_one_imageBody}
-                              imgUrl={teamOneImageUrl}
-                              setValue={setValue}
-                              defaultValue={defaultData?.team_one_image}
-                              flag='team_one_image'
-                           />
-                        </div>
-                     </div>
-                     <div className='col-span-2 lg:col-span-1 flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
-                        <h4 className='text-lg text-gray-800 font-semibold'>
-                           Team Two Information
-                        </h4>
-                        <div className='w-full'>
-                           <Input
-                              label='Name'
-                              register={register}
-                              id='team_two_name'
-                              required={true}
-                              errors={errors}
-                              nameW={team_two_name}
-                              setValue={setValue}
-                              defaultValue={defaultData?.team_two_name}
-                           />
-                        </div>
-                        <div className='w-full'>
-                           <Select
-                              label='Image Type'
-                              option={ImageTypeOptions}
-                              register={register}
-                              id='team_two_image'
-                              required={true}
-                              errors={errors}
-                              nameW={team_two_image}
-                              imgBody={team_two_imageBody}
-                              imgUrl={teamTwoImageUrl}
-                              setValue={setValue}
-                              defaultValue={defaultData?.team_two_image}
-                              flag='team_two_image'
-                           />
+                        <div className='col-span-2 lg:col-span-1 flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
+                           <h4 className='text-lg text-gray-800 font-semibold'>
+                              Team Two Information
+                           </h4>
+                           <div className='w-full'>
+                              <Input
+                                 label='Name'
+                                 register={register}
+                                 id='team_two_name'
+                                 required={true}
+                                 errors={errors}
+                                 nameW={team_two_name}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.team_two_name}
+                              />
+                           </div>
+                           <div className='w-full'>
+                              <Select
+                                 label='Image Type'
+                                 option={ImageTypeOptions}
+                                 register={register}
+                                 id='team_two_image'
+                                 required={true}
+                                 errors={errors}
+                                 nameW={team_two_image}
+                                 imgBody={team_two_imageBody}
+                                 imgUrl={teamTwoImageUrl}
+                                 setValue={setValue}
+                                 defaultValue={defaultData?.team_two_image}
+                                 flag='team_two_image'
+                              />
+                           </div>
                         </div>
                      </div>
                   </div>
-               </div>
-               <div className='flex flex-col gap-4'>
-                  <div className='relative flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
-                     <h4 className='text-lg text-gray-800 font-semibold'>
-                        Streaming Source
-                     </h4>
+                  <div className='flex flex-col gap-4'>
+                     <div className='relative flex flex-col gap-6 bg-white rounded-md shadow-md z-40 shadow-gray-500 w-full h-auto px-6 py-4'>
+                        <h4 className='text-lg text-gray-800 font-semibold'>
+                           Streaming Source
+                        </h4>
 
-                     {/* Streaming UI  */}
+                        {/* Streaming UI  */}
 
-                     {/* {[...dataArray].map((_, index) => {
+                        {/* {[...dataArray].map((_, index) => {
                         console.log('Index: ', index);
                      })} */}
 
-                     {/* {[...Array(dataLength)].map((_, index) => {
+                        {/* {[...Array(dataLength)].map((_, index) => {
                         //console.log('Index: ', index);
                         return <div onClick={removeData}>{index}</div>;
                      })} */}
 
-                     {/* {[...Array(dataLength)].map((_, index) => (
+                        {/* {[...Array(dataLength)].map((_, index) => (
                         <div
                            key={index}
                            className='my-4 grid grid-cols-1 lg:grid-cols-2 gap-6 ring-1 ring-gray-400 rounded-md px-8 py-6 relative'
@@ -1008,233 +1200,248 @@ const UpdateMatch = ({ matchId }) => {
                         </div>
                      ))} */}
 
-                     {fields?.map((field, index) => (
-                        <div
-                           key={index}
-                           className='my-4 grid grid-cols-1 lg:grid-cols-2 gap-6 ring-1 ring-gray-400 rounded-md px-8 py-6 relative'
-                        >
-                           {index > 0 && (
-                              <button className='absolute right-8 top-4 flex items-center justify-center bg-teal-600 text-sm pp-2 w-10 h-10 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'>
-                                 <MdOutlineDeleteSweep
-                                    onClick={() => remove(index)}
+                        {fields?.map((field, index) => (
+                           <div
+                              key={field?.id}
+                              className='my-4 grid grid-cols-1 lg:grid-cols-2 gap-6 ring-1 ring-gray-400 rounded-md px-8 py-6 relative'
+                           >
+                              <button className='absolute right-8 top-[24px] flex items-center justify-center bg-cyan-700 text-sm pp-2 w-10 h-10 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'>
+                                 <AiOutlineDelete
+                                    onClick={() => handleDelete(index)}
                                     className='w-6 h-6'
                                  />
                               </button>
-                           )}
-                           <div className='pt-16 col-span-2 lg:col-span-1'>
-                              <div className='flex flex-col gap-6'>
-                                 <div className='w-full'>
-                                    <Input
-                                       type='text'
-                                       label='Stream Title'
-                                       id={`streaming_sources[${index}].stream_title`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       nameW={watch(
-                                          `streaming_sources[${index}].stream_title`
-                                       )}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.stream_title
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <TextArea
-                                       label='Portrait Watermark(json)'
-                                       id={`streaming_sources[${index}].portrait_watermark`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       nameW={portrait_watermark}
-                                       topLabel='Portrait Watermark'
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.portrait_watermark
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <TextArea
-                                       label='Landscape Watermark(json)'
-                                       id={`streaming_sources[${index}].landscape_watermark`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       nameW={landscape_watermark}
-                                       topLabel='Landscape Watermark'
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.landscape_watermark
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <Input
-                                       label='Stream URL'
-                                       type='text'
-                                       id={`streaming_sources[${index}].stream_url`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.stream_url
-                                       }
-                                    />
-                                 </div>
-                              </div>
-                           </div>
-                           <div className='pt-16 col-span-2 lg:col-span-1'>
-                              <div className='flex flex-col gap-6'>
-                                 <div className='w-full'>
-                                    <Select
-                                       label='Resulation'
-                                       option={ResolutionOptions}
-                                       id={`streaming_sources[${index}].resolution`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.resolution
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <Select
-                                       label='Is Premium'
-                                       option={PremiumOptions}
-                                       id={`streaming_sources[${index}].is_premium`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       setValue={setValue}
-                                       //    defaultValue={
-                                       //     matchResult?.status === true ? 'Active' : 'Inactive'
-                                       //  }
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.is_premium === true
-                                             ? 'Active'
-                                             : 'Inactive'
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <Select
-                                       label='Platform'
-                                       option={PlatformOptions}
-                                       id={`streaming_sources[${index}].platform`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.platform
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <Select
-                                       label='Status'
-                                       option={StatusOptions}
-                                       id={`streaming_sources[${index}].stream_status`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.stream_status === true
-                                             ? 'Active'
-                                             : 'Inactive'
-                                       }
-                                    />
-                                 </div>
-                                 <div className='w-full'>
-                                    <Select
-                                       label='Stream Type'
-                                       option={StreamTypeOptions}
-                                       id={`streaming_sources[${index}].stream_type`}
-                                       required
-                                       register={register}
-                                       errors={errors}
-                                       nameW={watch(
-                                          `streaming_sources[${index}].stream_type`
-                                       )}
-                                       index={index}
-                                       setValue={setValue}
-                                       defaultValue={
-                                          defaultData?.streaming_sources[index]
-                                             ?.stream_type
-                                       }
-                                       streamingKey={
-                                          defaultData &&
-                                          defaultData?.streaming_sources[index]
-                                             ?.stream_key
-                                       }
-                                    />
+
+                              <div className='pt-16 col-span-2 lg:col-span-1'>
+                                 <div className='flex flex-col gap-6'>
+                                    <div className='w-full'>
+                                       <Input
+                                          type='text'
+                                          label='Stream Title'
+                                          id={`streaming_sources[${index}].stream_title`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          nameW={watch(
+                                             `streaming_sources[${index}].stream_title`
+                                          )}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.stream_title
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <TextArea
+                                          label='Portrait Watermark(json)'
+                                          id={`streaming_sources[${index}].portrait_watermark`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          nameW={portrait_watermark}
+                                          topLabel='Portrait Watermark'
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.portrait_watermark
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <TextArea
+                                          label='Landscape Watermark(json)'
+                                          id={`streaming_sources[${index}].landscape_watermark`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          nameW={landscape_watermark}
+                                          topLabel='Landscape Watermark'
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.landscape_watermark
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <Input
+                                          label='Stream URL'
+                                          type='text'
+                                          id={`streaming_sources[${index}].stream_url`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.stream_url
+                                          }
+                                       />
+                                    </div>
                                  </div>
                               </div>
+                              <div className='pt-16 col-span-2 lg:col-span-1'>
+                                 <div className='flex flex-col gap-6'>
+                                    <div className='w-full'>
+                                       <Select
+                                          label='Resulation'
+                                          option={ResolutionOptions}
+                                          id={`streaming_sources[${index}].resolution`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.resolution
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <Select
+                                          label='Is Premium'
+                                          option={PremiumOptions}
+                                          id={`streaming_sources[${index}].is_premium`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          setValue={setValue}
+                                          //    defaultValue={
+                                          //     matchResult?.status === true ? 'Active' : 'Inactive'
+                                          //  }
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.is_premium === true
+                                                ? 'Active'
+                                                : 'Inactive'
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <Select
+                                          label='Platform'
+                                          option={PlatformOptions}
+                                          id={`streaming_sources[${index}].platform`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.platform
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <Select
+                                          label='Status'
+                                          option={StatusOptions}
+                                          id={`streaming_sources[${index}].stream_status`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.stream_status === true
+                                                ? 'Active'
+                                                : 'Inactive'
+                                          }
+                                       />
+                                    </div>
+                                    <div className='w-full'>
+                                       <Select
+                                          label='Stream Type'
+                                          option={StreamTypeOptions}
+                                          id={`streaming_sources[${index}].stream_type`}
+                                          required
+                                          register={register}
+                                          errors={errors}
+                                          nameW={watch(
+                                             `streaming_sources[${index}].stream_type`
+                                          )}
+                                          index={index}
+                                          setValue={setValue}
+                                          defaultValue={
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.stream_type
+                                          }
+                                          streamingKey={
+                                             defaultData &&
+                                             defaultData?.streaming_sources[
+                                                index
+                                             ]?.stream_key
+                                          }
+                                       />
+                                    </div>
+                                 </div>
+                              </div>
+                              <div className='pt-16 col-span-2'>
+                                 {watch(
+                                    `streaming_sources[${index}].stream_type`
+                                 ) === 'Restricted' && (
+                                    <StreamItemFields
+                                       itemIndex={index}
+                                       errors={errors}
+                                       control={control}
+                                       register={register}
+                                       headers={
+                                          defaultData?.streaming_sources[index]
+                                             ?.headers
+                                       }
+                                       setValue={setValue}
+                                    />
+                                 )}
+                              </div>
                            </div>
-                           <div className='pt-16 col-span-2'>
-                              {watch(
-                                 `streaming_sources[${index}].stream_type`
-                              ) === 'Restricted' && (
-                                 <StreamItemFields
-                                    itemIndex={index}
-                                    errors={errors}
-                                    control={control}
-                                    register={register}
-                                    headers={
-                                       defaultData?.streaming_sources[index]
-                                          ?.headers
-                                    }
-                                    setValue={setValue}
-                                 />
-                              )}
-                           </div>
+                        ))}
+
+                        {/* Streaming UI */}
+
+                        <div className='my-4'>
+                           <button
+                              type='button'
+                              onClick={() =>
+                                 append({
+                                    stream_title: '',
+                                    portrait_watermark: '',
+                                    landscape_watermark: '',
+                                    stream_url: '',
+                                    resolution: '',
+                                    is_premium: '',
+                                    platform: '',
+                                    stream_status: '',
+                                    stream_type: '',
+                                    stream_key: '',
+                                    headers: []
+                                 })
+                              }
+                              // onClick={handleAddMore}
+                              className='absolute right-8 bottom-4 bg-cyan-700 text-sm px-2 py-2 w-24 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'
+                           >
+                              Add Stream
+                           </button>
                         </div>
-                     ))}
-
-                     {/* Streaming UI */}
-
-                     <div className='my-4'>
-                        <button
-                           type='button'
-                           onClick={() =>
-                              append({
-                                 stream_title: '',
-                                 portrait_watermark: '',
-                                 landscape_watermark: '',
-                                 stream_url: '',
-                                 resolution: '',
-                                 is_premium: '',
-                                 platform: '',
-                                 stream_status: '',
-                                 stream_type: '',
-                                 stream_key: '',
-                                 headers: []
-                              })
-                           }
-                           // onClick={handleAddMore}
-                           className='absolute right-8 bottom-4 bg-teal-600 text-sm px-2 py-2 w-24 rounded-md text-white shadow-sm shadow-gray-900 cursor-pointer hover:bg-teal-800 outline-none focus:outline-none'
-                        >
-                           Add More
-                        </button>
                      </div>
                   </div>
-               </div>
-               <button type='submit'>submit</button>
-            </form>
+                  <button
+                     className='bg-cyan-700 px-4 py-2 cursor-pointer text-white text-md rounded-md'
+                     type='submit'
+                  >
+                     Update
+                  </button>
+               </form>
+            )}
          </div>
       </DashboardLayout>
    );

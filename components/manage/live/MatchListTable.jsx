@@ -5,9 +5,10 @@ import Spinner from '@/components/Spinner/page';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { useState } from 'react';
+import { AiOutlineClose } from 'react-icons/ai';
 import { BiCommentEdit, BiLeftArrow, BiRightArrow } from 'react-icons/bi';
 import { BsSearch } from 'react-icons/bs';
-import { GrClone, GrFilter } from 'react-icons/gr';
+import { GrClone } from 'react-icons/gr';
 import { RiDeleteBin3Line } from 'react-icons/ri';
 
 const dropDownData = [
@@ -28,7 +29,7 @@ const dropDownData = [
    }
 ];
 
-const MatchList = ({ entities, columns }) => {
+const MatchList = ({ entities, columns, deleteMatch, updateMatchStatus }) => {
    const [currentPage, setCurrentPage] = useState(1);
    const [entitiesPerPage, setEntitiesPerPage] = useState(5);
    const [search, setSearch] = useState('');
@@ -36,6 +37,9 @@ const MatchList = ({ entities, columns }) => {
    const [sortDirection, setSortDirection] = useState('asc');
    const [isOpen, setIsOpen] = useState(false);
    const [actionIndex, setActionIndex] = useState(0);
+   const [renderModal, setRenderModal] = useState(false);
+   //const [triggerDeleteMatch, setTriggerDeleteMatch] = useState(false);
+   const [matchId, setMatchId] = useState('');
 
    // Logic for displaying current entities
    const indexOfLastEntity = currentPage * entitiesPerPage;
@@ -96,15 +100,81 @@ const MatchList = ({ entities, columns }) => {
       setEntitiesPerPage(Number(e.target.value));
    };
 
-   const handleClickDropdown = index => {
+   const handleClickDropdown = ({ index, matchId }) => {
       setActionIndex(index);
       setIsOpen(!isOpen);
+      setMatchId(matchId);
+   };
+
+   const handleDeleteMatch = () => {
+      if (matchId) {
+         // console.log('Match id', matchId);
+         deleteMatch(matchId);
+         setRenderModal(false);
+      }
+   };
+
+   const openModal = () => {
+      setRenderModal(true);
+   };
+   const closeModal = () => {
+      setRenderModal(false);
+      setMatchId('');
+   };
+   // updateMatchStatus
+   const handleUpdateStatus = ({ status, matchId }) => {
+      const newStatusValue = status === true ? false : true;
+      const dataObj = {
+         data: newStatusValue,
+         matchId: matchId
+      };
+      updateMatchStatus(dataObj);
    };
 
    //console.log(pageNumbers.length);
 
    return (
       <div className='container mx-auto w-full pt-6'>
+         {renderModal && (
+            <div
+               // className='w-full h-full inset-0 bg-gray200 z-50  bg-gray-400 flex items-center justify-center'
+               className='flex items-center justify-center 
+               inset-0 bg-neutral-800/70 fixed overflow-x-hidden
+               overflow-y-auto z-50 outline-none focus:outline-none '
+            >
+               <div className='bg-white w-[550px] flex flex-col gap-4 h-auto rounded-md px-6 py-8 relative'>
+                  <button
+                     onClick={closeModal}
+                     className='bg-rose-400 hover:bg-rose-500 w-8 h-8 p-2 absolute right-6 top-4 text-white rounded-md text-sm flex items-center justify-center'
+                  >
+                     <AiOutlineClose className='w-8 h-8' />
+                  </button>
+                  <div className='w-full h-auto flex items-center justify-center px-12'>
+                     <div className='text-gray-800 font-bold text-xl flex-col gap-8 my-12'>
+                        Are you sure you want to delete?
+                        <div className='text-neutral-500 text-base '>
+                           You will lose all of your match data while performing
+                           this action!
+                        </div>
+                     </div>
+                  </div>
+                  <div className='flex items-center gap-2 absolute bottom-4 right-6'>
+                     <button
+                        onClick={handleDeleteMatch}
+                        className='flex items-center justify-center font-semibold bg-rose-400 hover:bg-rose-500 px-3 py-2 text-white rounded-md text-sm'
+                     >
+                        Delete
+                     </button>
+                     <button
+                        onClick={closeModal}
+                        className='flex items-center justify-center font-semibold bg-gray-100 hover:bg-gray-200 px-3 py-2 text-gray-800 rounded-md text-sm'
+                     >
+                        Cancel
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
          <div className='flex flex-col gap-2 bg-gray-100'>
             {/* Search Input */}
 
@@ -135,11 +205,10 @@ const MatchList = ({ entities, columns }) => {
             {/* Search Input */}
 
             <div
-               className={`overflow-x-scroll overflow-y-scroll w-full
-              ${entitiesPerPage > 5 ? 'max-h-[40rem]' : 'h-auto'}
-             bg-white shadow overflow-scroll border-b sm:rounded-lg mt-6`}
+               className={`w-full max-h-[40rem]
+             bg-white shadow border-b sm:rounded-lg mt-6`}
             >
-               <table className='w-full min-w-max table-auto text-left'>
+               <table className='w-full h-full min-w-max table-auto text-left'>
                   <thead>
                      <tr>
                         {columns.map(column => (
@@ -151,7 +220,7 @@ const MatchList = ({ entities, columns }) => {
                            >
                               <div className='flex items-center gap-2'>
                                  {column}
-                                 <GrFilter />
+                                 {/* <GrFilter /> */}
                               </div>
                            </th>
                         ))}
@@ -217,6 +286,12 @@ const MatchList = ({ entities, columns }) => {
                               </td>
                               <td className='p-4 border-b border-blue-gray-50'>
                                  <div
+                                    onClick={() =>
+                                       handleUpdateStatus({
+                                          status: entity.status,
+                                          matchId: entity.id
+                                       })
+                                    }
                                     className={` px-2 py-1 flex items-center justify-center ${
                                        entity.status === true
                                           ? 'bg-green-600 hover:bg-green-700 transition-shadow'
@@ -233,7 +308,10 @@ const MatchList = ({ entities, columns }) => {
                                     <button
                                        className='bg-sky-800 px-4 py-2 text-sm rounded-md text-white cursor-pointer'
                                        onClick={() =>
-                                          handleClickDropdown(index + 1)
+                                          handleClickDropdown({
+                                             index: index + 1,
+                                             matchId: entity.id
+                                          })
                                        }
                                     >
                                        Action
@@ -243,6 +321,11 @@ const MatchList = ({ entities, columns }) => {
                                           <DropDownMenu
                                              dropDownData={dropDownData}
                                              matchId={entity.id}
+                                             openModal={openModal}
+                                             setIsOpen={setIsOpen}
+                                             handleDeleteMatch={
+                                                handleDeleteMatch
+                                             }
                                           />
                                        </div>
                                     )}
